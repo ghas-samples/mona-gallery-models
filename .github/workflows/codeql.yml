@@ -63,8 +63,6 @@ jobs:
                 - githubsecuritylab/codeql-javascript-queries
               java:
                 - githubsecuritylab/codeql-java-queries
-                # Models-as-data: hand-written extension models for popular Java libraries
-                - githubsecuritylab/codeql-java-extensions
                 # Models-as-data: auto-generated library source models for Java
                 - githubsecuritylab/codeql-java-library-sources
               go:
