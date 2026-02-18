@@ -1,0 +1,78 @@
+name: "CodeQL Analysis with Community Packs"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "25 6 * * 1"
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ matrix.language == 'java' && 'ubuntu-latest' || 'ubuntu-latest' }}
+    timeout-minutes: ${{ matrix.language == 'java' && 120 || 60 }}
+
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript
+            build-mode: none
+          - language: java
+            build-mode: autobuild
+          - language: go
+            build-mode: autobuild
+          - language: python
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java (for storage service)
+        if: matrix.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Go (for auth and gallery services)
+        if: matrix.language == 'go'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: auth/go.mod
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # Use Community Packs with models-as-data extensions
+          # https://github.com/GitHubSecurityLab/CodeQL-Community-Packs
+          config: |
+            packs:
+              javascript:
+                - githubsecuritylab/codeql-javascript-queries
+              java:
+                - githubsecuritylab/codeql-java-queries
+                # Models-as-data: hand-written extension models for popular Java libraries
+                - githubsecuritylab/codeql-java-extensions
+                # Models-as-data: auto-generated library source models for Java
+                - githubsecuritylab/codeql-java-library-sources
+              go:
+                - githubsecuritylab/codeql-go-queries
+              python:
+                - githubsecuritylab/codeql-python-queries
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
