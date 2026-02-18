@@ -46,7 +46,7 @@ jobs:
 
       - name: Set up Go (for auth and gallery services)
         if: matrix.language == 'go'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: auth/go.mod
 
@@ -60,15 +60,15 @@ jobs:
           config: |
             packs:
               javascript:
-                - githubsecuritylab/codeql-javascript-queries
+                - githubsecuritylab/codeql-javascript-queries@0.2.1
               java:
-                - githubsecuritylab/codeql-java-queries
+                - githubsecuritylab/codeql-java-queries@0.2.2
                 # Models-as-data: auto-generated library source models for Java
-                - githubsecuritylab/codeql-java-library-sources
+                - githubsecuritylab/codeql-java-library-sources@0.2.1
               go:
-                - githubsecuritylab/codeql-go-queries
+                - githubsecuritylab/codeql-go-queries@0.2.1
               python:
-                - githubsecuritylab/codeql-python-queries
+                - githubsecuritylab/codeql-python-queries@0.2.1
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
